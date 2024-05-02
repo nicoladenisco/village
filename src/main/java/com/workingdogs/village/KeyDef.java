@@ -98,7 +98,7 @@ public class KeyDef
    */
   public boolean containsAttrib(String name)
   {
-    return (mySelf.indexOf((Object) name) != -1);
+    return (mySelf.indexOf(name) != -1);
   }
 
   /**

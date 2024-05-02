@@ -1466,6 +1466,11 @@ public class Record
     return (this.saveType == Enums.ZOMBIE);
   }
 
+  public boolean isNew()
+  {
+    return toBeSavedWithInsert();
+  }
+
   /**
    * If the record is not clean, needs to be saved with an Update, Delete or Insert, it returns true.
    *
