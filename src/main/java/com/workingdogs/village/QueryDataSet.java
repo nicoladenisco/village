@@ -34,7 +34,8 @@ import org.commonlib5.utils.Pair;
  * <P>
  * Here is some example code for using a QueryDataSet.
  * <PRE>
- *  try(QueryDataSet qds = new QueryDataSet ( connection, "SELECT * from my_table" )) {
+ *  try(QueryDataSet qds = new QueryDataSet ( connection, "SELECT * from my_table" ))
+ *  {
  *    qds.fetchRecords(10); // fetch the first 10 records
  *    for ( int i = 0; i &lt; qds.size(); i++ )
  *    {
@@ -44,7 +45,8 @@ import org.commonlib5.utils.Pair;
  *    }
  *  }
  * </PRE>
- * It is important to always remember to close() a QueryDataSet in order to free the allocated resources.
+ * It is important to always remember to close() a QueryDataSet in order to free the allocated resources
+ * (or use a try with resource like the example).
  * </p>
  *
  * @author
@@ -183,7 +185,7 @@ public class QueryDataSet
   public static Record fetchFirstRecord(Connection dbCon, String sSQL)
      throws Exception
   {
-    try (QueryDataSet qs = new QueryDataSet(dbCon, sSQL))
+    try(QueryDataSet qs = new QueryDataSet(dbCon, sSQL))
     {
       qs.fetchRecords(1);
 
@@ -197,7 +199,7 @@ public class QueryDataSet
   public static Pair<Schema, Record> fetchFirstRecordAndSchema(Connection dbCon, String sSQL)
      throws Exception
   {
-    try (QueryDataSet qs = new QueryDataSet(dbCon, sSQL))
+    try(QueryDataSet qs = new QueryDataSet(dbCon, sSQL))
     {
       qs.fetchRecords(1);
 
@@ -211,7 +213,7 @@ public class QueryDataSet
   public static List<Record> fetchAllRecords(Connection dbCon, String sSQL)
      throws Exception
   {
-    try (QueryDataSet qs = new QueryDataSet(dbCon, sSQL))
+    try(QueryDataSet qs = new QueryDataSet(dbCon, sSQL))
     {
       return qs.fetchAllRecords();
     }
@@ -220,7 +222,7 @@ public class QueryDataSet
   public static Pair<Schema, List<Record>> fetchAllRecordsAndSchema(Connection dbCon, String sSQL)
      throws Exception
   {
-    try (QueryDataSet qs = new QueryDataSet(dbCon, sSQL))
+    try(QueryDataSet qs = new QueryDataSet(dbCon, sSQL))
     {
       return new Pair<>(qs.schema, qs.fetchAllRecords());
     }
@@ -229,7 +231,7 @@ public class QueryDataSet
   public static List<Record> fetchAllRecords(ResultSet rs)
      throws Exception
   {
-    try (QueryDataSet qs = new QueryDataSet(rs))
+    try(QueryDataSet qs = new QueryDataSet(rs))
     {
       return qs.fetchAllRecords();
     }
@@ -238,7 +240,7 @@ public class QueryDataSet
   public static Pair<Schema, List<Record>> fetchAllRecordsAndSchema(ResultSet rs)
      throws Exception
   {
-    try (QueryDataSet qs = new QueryDataSet(rs))
+    try(QueryDataSet qs = new QueryDataSet(rs))
     {
       return new Pair<>(qs.schema, qs.fetchAllRecords());
     }
