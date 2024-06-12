@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
@@ -71,7 +72,7 @@ public class VillageUtils
   public static int executeStatement(String sSQL, Connection con)
      throws Exception
   {
-    try (Statement st = con.createStatement())
+    try(Statement st = con.createStatement())
     {
       return st.executeUpdate(sSQL);
     }
@@ -104,7 +105,7 @@ public class VillageUtils
 
           if(!sSQL.isEmpty())
           {
-            try (PreparedStatement ps = con.prepareStatement(sSQL))
+            try(PreparedStatement ps = con.prepareStatement(sSQL))
             {
               count += ps.executeUpdate();
             }
@@ -399,5 +400,57 @@ public class VillageUtils
   public static java.sql.Timestamp currentTimestamp()
   {
     return new java.sql.Timestamp(System.currentTimeMillis());
+  }
+
+  public static Map getValueMap(Collection<Record> lsRecs, String keyField, String valueField, Map map)
+     throws Exception
+  {
+    for(Record r : lsRecs)
+    {
+      map.put(
+         r.getValue(keyField).getValue(),
+         r.getValue(valueField).getValue()
+      );
+    }
+    return map;
+  }
+
+  public static Map getValueMap(Collection<Record> lsRecs, int keyField, int valueField, Map map)
+     throws Exception
+  {
+    for(Record r : lsRecs)
+    {
+      map.put(
+         r.getValue(keyField).getValue(),
+         r.getValue(valueField).getValue()
+      );
+    }
+    return map;
+  }
+
+  public static Map getRecordMap(Collection<Record> lsRecs, String keyField, Map map)
+     throws Exception
+  {
+    for(Record r : lsRecs)
+    {
+      map.put(
+         r.getValue(keyField).getValue(),
+         r
+      );
+    }
+    return map;
+  }
+
+  public static Map getRecordMap(Collection<Record> lsRecs, int keyField, Map map)
+     throws Exception
+  {
+    for(Record r : lsRecs)
+    {
+      map.put(
+         r.getValue(keyField).getValue(),
+         r
+      );
+    }
+    return map;
   }
 }
