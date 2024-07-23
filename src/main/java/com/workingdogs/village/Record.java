@@ -1489,6 +1489,9 @@ public class Record
     if(clean)
       return false;
 
+    if(this.saveType == Enums.UNKNOWN)
+      this.saveType = Enums.UPDATE;
+
     return toBeSavedWithUpdate() || toBeSavedWithInsert();
 
     //return !isAZombie() || !recordIsClean() || toBeSavedWithUpdate() || toBeSavedWithDelete() || toBeSavedWithInsert();
