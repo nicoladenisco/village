@@ -67,12 +67,13 @@ public class Column
   }
 
   /**
-   * internal package method for populating a Column instance
+   * internal package method for populating a Column instance.
    *
    * @param rsmd TODO: DOCUMENT ME!
    * @param colNum TODO: DOCUMENT ME!
    * @param tableName TODO: DOCUMENT ME!
    * @param columnName The name of the column
+   * @param primaryIndex if is primary is the index in primary key
    *
    * @throws SQLException TODO: DOCUMENT ME!
    */
@@ -97,6 +98,7 @@ public class Column
    * @param columnTypeName The Data source dependent type name
    * @param columnType The SQL type from java.sql.Types
    * @param isNullable true if NULL allowed.
+   * @param primaryIndex if is primary is the index in primary key
    *
    */
   public void populate(String tableName, String columnName,

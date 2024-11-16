@@ -33,34 +33,33 @@ import org.commonlib5.lambda.ConsumerThrowException;
  * for an update, if you need join functionality on a select, you should use a
  * <a href="QueryDataSet.html">QueryDataSet</a>.
  *
- * <P>
+ * <br>
  * Here is an example usage for this code that gets the first 10 records where column "a" = 1:
  * <PRE>
+ * <code>
+ *
  *  KeyDef kd = new KeyDef().setAttrib("column");
  *  TableDataSet tds = new TableDataSet(connection, "table_name", kd );
  *  tds.where ("a=1" ); // WHERE a = 1
  *  tds.fetchRecords(10); // fetch first 10 records where column a=1
- *  for ( int i=0;i< tds.size(); i++ )
+ *  for ( int i=0;i&lt; tds.size(); i++ )
  *  {
- *  Record rec = tds.getRecord(i); // zero based
- *  String columnA = rec.getValue("a");
- *  if ( columnA.equals ("1") )
- *  System.out.print ("We got a column!");
+ *    Record rec = tds.getRecord(i); // zero based
+ *    String columnA = rec.getValue("a");
+ *    if ( columnA.equals ("1") )
+ *    System.out.print ("We got a column!");
  *  }
  *  tds.close();
+ *
+ * </code>
  * </PRE>
- * </p>
- *
- * <P>
+ * <br>
  * It is important to remember to always close() the TableDataSet when you are finished with it.
- * </p>
- *
- * <P>
+ * <br>
  * As you can see, using a TableDataSet makes doing selects from the database trivial. You do not need to write any SQL
  * and it
  * makes it easy to cache a TableDataSet for future use within your application.
- * </p>
- *
+ * <br>
  * @author <a href="mailto:jon@latchkey.com">Jon S. Stevens</a>
  * @version $Revision: 568 $
  */

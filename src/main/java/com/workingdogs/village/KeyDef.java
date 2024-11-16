@@ -28,7 +28,7 @@ import java.util.List;
  * href="TableDataSet.html">TableDataSet</a>. Essentially a KeyDef is what forms the WHERE clause for an UPDATE or
  * DELETE.
  *
- * <p>
+ * <br>
  * In order to use the KeyDef, you simply use it like this:
  * <PRE>
  *  KeyDef kd = new KeyDef().addAttrib("key_column_a");
@@ -40,14 +40,10 @@ import java.util.List;
  *  tds.close();
  * </PRE>
  * In the above example, Record 0 is retrieved from the database table and the following update statement is generated:
- * </p>
+ * <br>
  *
- * <P>
  * UPDATE table SET column_name=? WHERE key_column_a=?
- * </p>
  *
- * <P>
- * </p>
  *
  * @author <a href="mailto:jon@latchkey.com">Jon S. Stevens</a>
  * @version $Revision: 568 $
