@@ -16,6 +16,7 @@
  */
 package com.workingdogs.village;
 
+import java.io.BufferedReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Serializable;
@@ -38,7 +39,18 @@ import org.commonlib5.utils.CommonFileUtils;
 public class VillageUtils
 {
   /** The log. */
-  private static Log log = LogFactory.getLog(VillageUtils.class);
+  private static final Log log = LogFactory.getLog(VillageUtils.class);
+  public static final int SB_SIZE = 512;
+
+  /**
+   * Private constructor to prevent instantiation.
+   *
+   * Class contains only static method ans should therefore not be
+   * instantiated.
+   */
+  private VillageUtils()
+  {
+  }
 
   /**
    * Ritorna il valore massimo di un campo su una tabella.
@@ -91,7 +103,7 @@ public class VillageUtils
      throws Exception
   {
     int c, count = 0;
-    StringBuilder sb = new StringBuilder(128);
+    StringBuilder sb = new StringBuilder(SB_SIZE);
 
     do
     {
@@ -101,25 +113,8 @@ public class VillageUtils
       {
         if(sb.length() != 0)
         {
-          String sSQL = sb.toString().trim();
-
-          if(!sSQL.isEmpty())
-          {
-            try(PreparedStatement ps = con.prepareStatement(sSQL))
-            {
-              count += ps.executeUpdate();
-            }
-            catch(Exception ex)
-            {
-              if(ignoreErrors)
-              {
-                System.err.println("Execute script SQL error: " + ex.getMessage());
-              }
-              else
-                throw ex;
-            }
-            sb = new StringBuilder(128);
-          }
+          count += executeBuffer(con, sb, ignoreErrors);
+          sb = new StringBuilder(SB_SIZE);
         }
       }
       else
@@ -133,13 +128,73 @@ public class VillageUtils
   }
 
   /**
-   * Private constructor to prevent instantiation.
-   *
-   * Class contains only static method ans should therefore not be
-   * instantiated.
+   * Esegue uno script SQL.
+   * Ogni query viene riconosciuta dal terminatore ';'.
+   * La lettura dello script avviene una linea per volta.
+   * I commenti (--) vengono ignorati.
+   * @param con connessione al db
+   * @param r reader da cui leggere lo script
+   * @param ignoreErrors se vero log degli errori senza interruzione
+   * @return numero di query eseguite
+   * @throws Exception
    */
-  private VillageUtils()
+  public static int executeSqlScriptByLine(Connection con, BufferedReader r, boolean ignoreErrors)
+     throws Exception
   {
+    int count = 0;
+    StringBuilder sb = new StringBuilder(SB_SIZE);
+    String s;
+
+    while((s = r.readLine()) != null)
+    {
+      s = s.trim();
+
+      if(s.isEmpty())
+        continue;
+      if(s.startsWith("--"))
+        continue;
+
+      sb.append(s).append("\n");
+      if(s.endsWith(";"))
+      {
+        count += executeBuffer(con, sb, ignoreErrors);
+        sb = new StringBuilder(SB_SIZE);
+      }
+    }
+
+    // eventuale residuo non consumato
+    executeBuffer(con, sb, ignoreErrors);
+
+    return count;
+  }
+
+  public static int executeBuffer(Connection con, StringBuilder sb, boolean ignoreErrors)
+     throws Exception
+  {
+    String sSQL = sb.toString().trim();
+
+    // rimuove ';' finale: su alcuni db non è tollerato
+    if(sSQL.endsWith(";"))
+      sSQL = sSQL.substring(0, sSQL.length() - 1);
+
+    if(!sSQL.isEmpty())
+    {
+      try(PreparedStatement ps = con.prepareStatement(sSQL))
+      {
+        return ps.executeUpdate();
+      }
+      catch(Exception ex)
+      {
+        if(ignoreErrors)
+        {
+          log.warn("Ignored SQL error: " + ex.getMessage());
+        }
+        else
+          throw ex;
+      }
+    }
+
+    return 0;
   }
 
   /**
