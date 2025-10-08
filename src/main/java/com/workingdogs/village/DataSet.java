@@ -40,7 +40,7 @@ import org.commonlib5.lambda.ConsumerThrowException;
 public abstract class DataSet implements Closeable
 {
   /** indicates that all records should be retrieved during a fetch */
-  protected static final int ALL_RECORDS = -1;
+  public static final int ALL_RECORDS = -1;
 
   /** this DataSet's schema object */
   protected Schema schema;
