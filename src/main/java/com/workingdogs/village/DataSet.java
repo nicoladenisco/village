@@ -129,7 +129,7 @@ public abstract class DataSet implements Closeable
   {
     this.conn = conn;
     this.columns = "*";
-    this.schema = Schema.schema(conn, ts.first, ts.second, "*");
+    this.schema = Schema.schema(conn, ts, "*");
 
     // ricerca automatica della chiave primaria
     String keyValue = Schema.makeKeyHash(conn.getMetaData().getURL(), ts.first, ts.second);

@@ -88,7 +88,7 @@ public class QueryDataSet
       stmt = conn.createStatement();
       resultSet = stmt.executeQuery(selectStmt);
       schema = new Schema();
-      schema.populate(resultSet.getMetaData(), null, conn);
+      schema.populate(resultSet.getMetaData(), null, null, conn);
       ok = true;
     }
     finally
@@ -122,7 +122,7 @@ public class QueryDataSet
     this.conn = resultSet.getStatement().getConnection();
     selectString = new StringBuilder();
     schema = new Schema();
-    schema.populate(resultSet.getMetaData(), null, conn);
+    schema.populate(resultSet.getMetaData(), null, null, conn);
   }
 
   /**
@@ -185,7 +185,7 @@ public class QueryDataSet
   public static Record fetchFirstRecord(Connection dbCon, String sSQL)
      throws Exception
   {
-    try (QueryDataSet qs = new QueryDataSet(dbCon, sSQL))
+    try(QueryDataSet qs = new QueryDataSet(dbCon, sSQL))
     {
       qs.fetchRecords(1);
 
@@ -199,7 +199,7 @@ public class QueryDataSet
   public static Pair<Schema, Record> fetchFirstRecordAndSchema(Connection dbCon, String sSQL)
      throws Exception
   {
-    try (QueryDataSet qs = new QueryDataSet(dbCon, sSQL))
+    try(QueryDataSet qs = new QueryDataSet(dbCon, sSQL))
     {
       qs.fetchRecords(1);
 
@@ -213,7 +213,7 @@ public class QueryDataSet
   public static List<Record> fetchAllRecords(Connection dbCon, String sSQL)
      throws Exception
   {
-    try (QueryDataSet qs = new QueryDataSet(dbCon, sSQL))
+    try(QueryDataSet qs = new QueryDataSet(dbCon, sSQL))
     {
       return qs.fetchAllRecords();
     }
@@ -222,7 +222,7 @@ public class QueryDataSet
   public static Pair<Schema, List<Record>> fetchAllRecordsAndSchema(Connection dbCon, String sSQL)
      throws Exception
   {
-    try (QueryDataSet qs = new QueryDataSet(dbCon, sSQL))
+    try(QueryDataSet qs = new QueryDataSet(dbCon, sSQL))
     {
       return new Pair<>(qs.schema, qs.fetchAllRecords());
     }
@@ -231,7 +231,7 @@ public class QueryDataSet
   public static List<Record> fetchAllRecords(ResultSet rs)
      throws Exception
   {
-    try (QueryDataSet qs = new QueryDataSet(rs))
+    try(QueryDataSet qs = new QueryDataSet(rs))
     {
       return qs.fetchAllRecords();
     }
@@ -240,7 +240,7 @@ public class QueryDataSet
   public static Pair<Schema, List<Record>> fetchAllRecordsAndSchema(ResultSet rs)
      throws Exception
   {
-    try (QueryDataSet qs = new QueryDataSet(rs))
+    try(QueryDataSet qs = new QueryDataSet(rs))
     {
       return new Pair<>(qs.schema, qs.fetchAllRecords());
     }

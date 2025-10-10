@@ -210,7 +210,7 @@ public final class Schema
             tableSchema.setSchemaName(ts.first);
             tableSchema.setTableName(ts.second);
             tableSchema.setAttributes(columnsAttribute);
-            tableSchema.populate(stmt.getMetaData(), ts.second, conn);
+            tableSchema.populate(stmt.getMetaData(), ts.first, ts.second, conn);
             schemaCache.put(keyValue, tableSchema);
           }
           else
@@ -457,6 +457,7 @@ public final class Schema
    * Internal method which populates this Schema object with Columns.
    *
    * @param meta The meta data of the ResultSet used to build this Schema.
+   * @param sname The name of the schema referenced in this schema, or null if unknown or multiple tables are
    * @param tname The name of the table referenced in this schema, or null if unknown or multiple tables are
    * involved.
    * @param con database connection
@@ -464,7 +465,7 @@ public final class Schema
    * @exception SQLException
    * @exception DataSetException
    */
-  public void populate(ResultSetMetaData meta, String tname, Connection con)
+  public void populate(ResultSetMetaData meta, String sname, String tname, Connection con)
      throws SQLException, DataSetException
   {
     numberOfColumns = meta.getColumnCount();
@@ -477,7 +478,7 @@ public final class Schema
 
     for(int i = 1; i <= numberOfColumns(); i++)
     {
-      String metaSchemaName = getSecureSchemaName(meta, i, null);
+      String metaSchemaName = getSecureSchemaName(meta, i, sname);
       String metaTableName = getSecureTableName(meta, i, tname);
       String metaColumnName = meta.getColumnName(i);
 
