@@ -614,7 +614,7 @@ public final class Schema
   {
     try
     {
-      return meta.getSchemaName(i);
+      return StringOper.okStr(meta.getSchemaName(i), schemaName);
     }
     catch(Exception e)
     {
