@@ -479,10 +479,11 @@ public class TableDataSet
       selectString.setLength(0);
     }
 
+    //String schema = schema.get
     selectString.append("SELECT ");
     selectString.append(schema.attributes());
     selectString.append(" FROM ");
-    selectString.append(schema.tableName());
+    selectString.append(schema.getFullTableName());
 
     if((this.where != null) && (this.where.length() > 0))
     {
@@ -681,7 +682,7 @@ public class TableDataSet
       }
     }
 
-    return "SELECT " + iss1.toString() + " FROM " + schema.tableName() + " WHERE " + iss2.toString();
+    return "SELECT " + iss1.toString() + " FROM " + schema.getFullTableName() + " WHERE " + iss2.toString();
   }
 
   public long getNextID()
@@ -696,7 +697,7 @@ public class TableDataSet
       throw new Exception("KeyDef must have one and only one column.");
 
     String campo = keydef.getAttrib(0);
-    return VillageUtils.getMaxField(schema().tableName(), campo, null, conn) + 1;
+    return VillageUtils.getMaxField(schema().getFullTableName(), campo, null, conn) + 1;
   }
 
   public long getNextIDFromSequence(String sequenceName)
@@ -732,7 +733,7 @@ public class TableDataSet
   public static Record fetchOneRecord(String tableName, String where, Connection con)
      throws Exception
   {
-    try (TableDataSet tds = new TableDataSet(con, tableName))
+    try(TableDataSet tds = new TableDataSet(con, tableName))
     {
       tds.where(where);
       tds.fetchRecords(1);
@@ -743,7 +744,7 @@ public class TableDataSet
   public static List<Record> fetchAllRecords(String tableName, String where, Connection con)
      throws Exception
   {
-    try (TableDataSet tds = new TableDataSet(con, tableName))
+    try(TableDataSet tds = new TableDataSet(con, tableName))
     {
       tds.where(where);
       return tds.fetchAllRecords();

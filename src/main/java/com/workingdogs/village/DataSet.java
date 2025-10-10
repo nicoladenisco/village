@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import org.commonlib5.lambda.ConsumerThrowException;
+import org.commonlib5.utils.Pair;
 
 /**
  * The DataSet represents a table in the database. It is extended by <a href="QueryDataSet.html">QueryDataSet</a> and <a
@@ -104,7 +105,7 @@ public abstract class DataSet implements Closeable
   public DataSet(Connection conn, String tableName)
      throws DataSetException, SQLException
   {
-    this(conn, Schema.getSchemaFromTable(conn, tableName), tableName);
+    this(conn, "", tableName);
   }
 
   /**
@@ -120,11 +121,18 @@ public abstract class DataSet implements Closeable
   public DataSet(Connection conn, String schemaName, String tableName)
      throws DataSetException, SQLException
   {
+    this(conn, VillageUtils.getCorrectSchema(schemaName, tableName));
+  }
+
+  public DataSet(Connection conn, Pair<String, String> ts)
+     throws DataSetException, SQLException
+  {
     this.conn = conn;
     this.columns = "*";
-    this.schema = Schema.schema(conn, schemaName, tableName, "*");
+    this.schema = Schema.schema(conn, ts.first, ts.second, "*");
 
-    String keyValue = Schema.makeKeyHash(conn.getMetaData().getURL(), schemaName, tableName);
+    // ricerca automatica della chiave primaria
+    String keyValue = Schema.makeKeyHash(conn.getMetaData().getURL(), ts.first, ts.second);
     synchronized(keydefCache)
     {
       if((keyDefValue = keydefCache.get(keyValue)) == null)
@@ -223,7 +231,7 @@ public abstract class DataSet implements Closeable
     this.conn = conn;
     this.columns = columns;
     this.keyDefValue = keyDef;
-    this.schema = Schema.schema(conn, Schema.getSchemaFromTable(conn, tableName), tableName, columns);
+    this.schema = Schema.schema(conn, "", tableName, columns);
   }
 
   /**
@@ -733,6 +741,19 @@ public abstract class DataSet implements Closeable
   }
 
   /**
+   * Gets the tableName defined in the schema (schema.table).
+   *
+   * @return string
+   *
+   * @throws DataSetException TODO: DOCUMENT ME!
+   */
+  public String getFullTableName()
+     throws DataSetException
+  {
+    return schema.getFullTableName();
+  }
+
+  /**
    * Classes extending this class must implement this method.
    *
    * @return the select string
@@ -819,7 +840,7 @@ public abstract class DataSet implements Closeable
           selectString.append("SELECT ");
           selectString.append(schema.attributes());
           selectString.append(" FROM ");
-          selectString.append(schema.tableName());
+          selectString.append(schema.getFullTableName());
         }
 
         stmt = connection().createStatement();

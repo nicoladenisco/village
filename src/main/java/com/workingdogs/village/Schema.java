@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import org.commonlib5.utils.Pair;
 import org.commonlib5.utils.StringOper;
 
 /**
@@ -111,7 +112,7 @@ public final class Schema
     DatabaseMetaData databaseMetaData = conn.getMetaData();
     String connURL = databaseMetaData.getURL();
 
-    try (ResultSet rsTables = databaseMetaData.getTables(conn.getCatalog(), null, null, TABLES_FILTER))
+    try(ResultSet rsTables = databaseMetaData.getTables(conn.getCatalog(), null, null, TABLES_FILTER))
     {
       while(rsTables.next())
       {
@@ -119,7 +120,7 @@ public final class Schema
         String tableName = StringOper.okStr(rsTables.getString("TABLE_NAME"));
         cacheSchemaTable.put(tableName, schemaName);
 
-        try (ResultSet rsColumns = databaseMetaData.getColumns(conn.getCatalog(), schemaName, tableName, null))
+        try(ResultSet rsColumns = databaseMetaData.getColumns(conn.getCatalog(), schemaName, tableName, null))
         {
           Schema schema = new Schema();
 
@@ -148,32 +149,6 @@ public final class Schema
     return connURL + "|" + schemaName + "|" + tableName;
   }
 
-  public static String getSchemaFromTable(Connection conn, String tableName)
-     throws SQLException, DataSetException
-  {
-    String schemaName = cacheSchemaTable.get(tableName);
-
-    if(schemaName == null && cacheSchemaTable.isEmpty())
-    {
-      DatabaseMetaData databaseMetaData = conn.getMetaData();
-
-      try (ResultSet rsTables = databaseMetaData.getTables(conn.getCatalog(), null, null, TABLES_FILTER))
-      {
-        while(rsTables.next())
-        {
-          cacheSchemaTable.put(
-             StringOper.okStr(rsTables.getString(3)),
-             StringOper.okStr(rsTables.getString(2))
-          );
-        }
-      }
-
-      schemaName = cacheSchemaTable.getOrDefault(tableName, "");
-    }
-
-    return schemaName == null ? "" : schemaName;
-  }
-
   /**
    * Creates a Schema with all columns
    *
@@ -188,7 +163,7 @@ public final class Schema
   public static Schema schema(Connection conn, String tableName)
      throws SQLException, DataSetException
   {
-    return schema(conn, getSchemaFromTable(conn, tableName), tableName, "*");
+    return schema(conn, "", tableName, "*");
   }
 
   /**
@@ -207,14 +182,16 @@ public final class Schema
   public static Schema schema(Connection conn, String schemaName, String tableName, String columnsAttribute)
      throws SQLException, DataSetException
   {
-    if(columnsAttribute == null)
-    {
-      columnsAttribute = "*";
-    }
+    return schema(conn, VillageUtils.getCorrectSchema(schemaName, tableName), columnsAttribute);
+  }
 
+  public static Schema schema(Connection conn, Pair<String, String> ts, String columnsAttribute)
+     throws SQLException, DataSetException
+  {
     Schema tableSchema = null;
     DatabaseMetaData dbMeta = conn.getMetaData();
-    String keyValue = makeKeyHash(dbMeta.getURL(), schemaName, tableName);
+    String keyValue = makeKeyHash(dbMeta.getURL(), ts.first, ts.second);
+    columnsAttribute = StringOper.okStr(columnsAttribute, "*");
 
     synchronized(schemaCache)
     {
@@ -222,30 +199,43 @@ public final class Schema
 
       if(tableSchema == null)
       {
-        String sql = "SELECT " + columnsAttribute + " FROM " + tableName + " WHERE 1 = -1";
-        //System.out.println("Schema sql: " + sql);
+        String sql = buildSchemaQuery(columnsAttribute, ts);
 
-        try (PreparedStatement stmt = conn.prepareStatement(sql))
+        try(PreparedStatement stmt = conn.prepareStatement(sql))
         {
           if(stmt != null)
           {
             stmt.executeQuery();
             tableSchema = new Schema();
-            tableSchema.setSchemaName(schemaName);
-            tableSchema.setTableName(tableName);
+            tableSchema.setSchemaName(ts.first);
+            tableSchema.setTableName(ts.second);
             tableSchema.setAttributes(columnsAttribute);
-            tableSchema.populate(stmt.getMetaData(), tableName, conn);
+            tableSchema.populate(stmt.getMetaData(), ts.second, conn);
             schemaCache.put(keyValue, tableSchema);
           }
           else
           {
-            throw new DataSetException("Couldn't retrieve schema for " + tableName);
+            throw new DataSetException("Couldn't retrieve schema for " + ts.second);
           }
         }
       }
     }
 
     return tableSchema;
+  }
+
+  private static String buildSchemaQuery(String columnsAttribute, Pair<String, String> ts)
+  {
+    StringBuilder sql = new StringBuilder(128);
+    sql.append("SELECT ");
+    sql.append(columnsAttribute);
+    sql.append(" FROM ");
+    if(ts.first != null && !ts.first.isEmpty())
+      sql.append(ts.first).append(".");
+    sql.append(ts.second);
+    sql.append(" WHERE 1 = -1");
+    //System.out.println("Schema sql: " + sql);
+    return sql.toString();
   }
 
   /**
@@ -718,6 +708,17 @@ public final class Schema
   public void setSchemaName(String schemaName)
   {
     this.schemaName = schemaName;
+  }
+
+  public String getFullTableName()
+     throws DataSetException
+  {
+    if(schemaName == null || schemaName.isEmpty())
+    {
+      return getTableName();
+    }
+
+    return schemaName + "." + getTableName();
   }
 
   /**

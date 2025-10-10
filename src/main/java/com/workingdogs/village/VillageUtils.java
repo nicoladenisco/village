@@ -31,8 +31,10 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.commonlib5.utils.CommonFileUtils;
+import org.commonlib5.utils.Pair;
 
 /**
+ * Utilita generale.
  *
  * @author Nicola De Nisco
  */
@@ -76,7 +78,7 @@ public class VillageUtils
   public static long getValueFromSequence(String sequenceName, Connection con)
      throws Exception
   {
-    String sSQL = "SELECT nextval('" + sequenceName + "'::regclass)";
+    String sSQL = "SELECT nextval('" + sequenceName + "')";
     Record rec = QueryDataSet.fetchFirstRecord(con, sSQL);
     return rec == null ? 0 : rec.getValue(1).asLong();
   }
@@ -507,5 +509,26 @@ public class VillageUtils
       );
     }
     return map;
+  }
+
+  /**
+   * Corregge situazioni in cui la tabella è indicata con SCHEMA.TABELLA.
+   * Se il nome dello schema è vuoto e il nome tabella è SCHEMA.TABELLA
+   * ritorna correttamente schema e tabella.
+   * @param schema nome dello schema
+   * @param table nome della tabella
+   * @return correzione a schema e tabella.
+   */
+  public static Pair<String, String> getCorrectSchema(String schema, String table)
+  {
+    int pos;
+    if(schema.isEmpty() && (pos = table.indexOf('.')) != -1)
+    {
+      // workaround nel caso table è nella forma SCHEMA.TABELLA
+      schema = table.substring(0, pos);
+      table = table.substring(pos + 1);
+    }
+
+    return new Pair<>(schema, table);
   }
 }

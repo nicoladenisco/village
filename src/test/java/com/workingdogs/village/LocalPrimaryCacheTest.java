@@ -65,14 +65,31 @@ public class LocalPrimaryCacheTest
 
   /**
    * Test of findInPrimary method, of class LocalPrimaryCache.
+   * @throws java.lang.Exception
    */
   @Test
-  public void testFindInPrimary()
+  public void testFindInPrimary1()
      throws Exception
   {
-    System.out.println("findInPrimary");
+    System.out.println("findInPrimary1");
     String metaSchemaName = "STP";
     String metaTableName = "TRANSCODE";
+    String metaColumnName = "APP";
+
+    DatabaseMetaData meta = th.con.getMetaData();
+    LocalPrimaryCache instance = new LocalPrimaryCache(th.con.getCatalog(), meta);
+    int expResult = 1;
+    int result = instance.findInPrimary(metaSchemaName, metaTableName, metaColumnName);
+    assertEquals(expResult, result);
+  }
+
+  @Test
+  public void testFindInPrimary2()
+     throws Exception
+  {
+    System.out.println("findInPrimary2");
+    String metaSchemaName = "";
+    String metaTableName = "STP.TRANSCODE";
     String metaColumnName = "APP";
 
     DatabaseMetaData meta = th.con.getMetaData();

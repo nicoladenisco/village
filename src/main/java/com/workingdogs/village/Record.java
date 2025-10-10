@@ -260,7 +260,7 @@ public class Record
   public int saveWithDelete(Connection connection)
      throws DataSetException, SQLException
   {
-    try (PreparedStatement stmt = connection.prepareStatement(getSaveString()))
+    try(PreparedStatement stmt = connection.prepareStatement(getSaveString()))
     {
       int ps = 1;
 
@@ -304,7 +304,7 @@ public class Record
   public int saveWithUpdate(Connection connection)
      throws DataSetException, SQLException
   {
-    try (PreparedStatement stmt = connection.prepareStatement(getSaveString()))
+    try(PreparedStatement stmt = connection.prepareStatement(getSaveString()))
     {
       int ps = 1;
 
@@ -361,7 +361,7 @@ public class Record
   public int saveWithInsert(Connection connection)
      throws DataSetException, SQLException
   {
-    try (PreparedStatement stmt = connection.prepareStatement(getSaveString()))
+    try(PreparedStatement stmt = connection.prepareStatement(getSaveString()))
     {
       int ps = 1;
 
@@ -414,7 +414,7 @@ public class Record
   {
     Column primary = null;
 
-    try (PreparedStatement stmt = connection.prepareStatement(getSaveString(), Statement.RETURN_GENERATED_KEYS))
+    try(PreparedStatement stmt = connection.prepareStatement(getSaveString(), Statement.RETURN_GENERATED_KEYS))
     {
       int ps = 1;
 
@@ -439,7 +439,7 @@ public class Record
 
       if(ret != 0 && primary != null)
       {
-        try (ResultSet rs = stmt.getGeneratedKeys())
+        try(ResultSet rs = stmt.getGeneratedKeys())
         {
           if(rs != null && rs.next())
           {
@@ -540,7 +540,7 @@ public class Record
       }
     }
 
-    return "UPDATE " + schema().tableName() + " SET " + iss1.toString() + " WHERE " + iss2.toString();
+    return "UPDATE " + schema().getFullTableName() + " SET " + iss1.toString() + " WHERE " + iss2.toString();
   }
 
   /**
@@ -580,7 +580,7 @@ public class Record
       }
     }
 
-    return "DELETE FROM " + schema().tableName() + " WHERE " + iss1.toString();
+    return "DELETE FROM " + schema().getFullTableName() + " WHERE " + iss1.toString();
   }
 
   /**
@@ -616,7 +616,7 @@ public class Record
       }
     }
 
-    return "INSERT INTO " + schema().tableName() + " ( " + iss1.toString() + " ) VALUES ( " + iss2.toString() + " )";
+    return "INSERT INTO " + schema().getFullTableName() + " ( " + iss1.toString() + " ) VALUES ( " + iss2.toString() + " )";
   }
 
   /**
@@ -1568,7 +1568,7 @@ public class Record
       throw new DataSetException("You can only perform a refresh on Records created with a TableDataSet.");
     }
 
-    try (PreparedStatement stmt = connection.prepareStatement(getRefreshQueryString()))
+    try(PreparedStatement stmt = connection.prepareStatement(getRefreshQueryString()))
     {
       int ps = 1;
       for(int i = 1; i <= dataset().keydef().size(); i++)
@@ -1583,7 +1583,7 @@ public class Record
         val.setPreparedStatementValue(stmt, ps++);
       }
 
-      try (ResultSet rs = stmt.executeQuery())
+      try(ResultSet rs = stmt.executeQuery())
       {
         rs.next();
         initializeRecord();
@@ -1658,7 +1658,7 @@ public class Record
       }
     }
 
-    return "SELECT " + iss1.toString() + " FROM " + schema().tableName() + " WHERE " + iss2.toString();
+    return "SELECT " + iss1.toString() + " FROM " + schema().getFullTableName() + " WHERE " + iss2.toString();
   }
 
   /**

@@ -35,6 +35,7 @@ public class LocalPrimaryCache
   private final String catalog, connURL;
   private final DatabaseMetaData dbMeta;
   private static final HashMap<String, Map<String, Integer>> pkCache = new HashMap<>(256);
+  private static final Object semaforo = new Object();
 
   public LocalPrimaryCache(String catalog, DatabaseMetaData dbMeta)
      throws SQLException
@@ -47,24 +48,40 @@ public class LocalPrimaryCache
   public int findInPrimary(String metaSchemaName, String metaTableName, String metaColumnName)
      throws SQLException
   {
+    int pos;
+    if(metaSchemaName.isEmpty() && (pos = metaTableName.indexOf('.')) != -1)
+    {
+      // workaround nel caso metaTableName è nella forma SCHEMA.TABELLA
+      metaSchemaName = metaTableName.substring(0, pos);
+      metaTableName = metaTableName.substring(pos + 1);
+    }
+
     String key = connURL + "|" + StringOper.okStr(metaSchemaName, "NO_SCHEMA") + "|" + metaTableName;
 
     Map<String, Integer> tablepks = pkCache.get(key);
 
     if(tablepks == null)
     {
-      tablepks = new HashMap<>();
-
-      if(dbMeta.getClass().getName().contains("Jtds"))
+      synchronized(semaforo)
       {
-        jtdsDriver(metaSchemaName, metaTableName, tablepks);
-      }
-      else
-      {
-        allDriver(metaSchemaName, metaTableName, tablepks);
-      }
+        tablepks = pkCache.get(key);
 
-      pkCache.put(key, tablepks);
+        if(tablepks == null)
+        {
+          tablepks = new HashMap<>();
+
+          if(dbMeta.getClass().getName().contains("Jtds"))
+          {
+            jtdsDriver(metaSchemaName, metaTableName, tablepks);
+          }
+          else
+          {
+            allDriver(metaSchemaName, metaTableName, tablepks);
+          }
+
+          pkCache.put(key, tablepks);
+        }
+      }
     }
 
     return tablepks.getOrDefault(metaColumnName, 0);
@@ -73,7 +90,7 @@ public class LocalPrimaryCache
   protected void allDriver(String metaSchemaName, String metaTableName, Map<String, Integer> tablepks)
      throws SQLException
   {
-    try (ResultSet dbPrimary = dbMeta.getPrimaryKeys(catalog, metaSchemaName, metaTableName))
+    try(ResultSet dbPrimary = dbMeta.getPrimaryKeys(catalog, metaSchemaName, metaTableName))
     {
       while(dbPrimary.next())
       {
@@ -95,7 +112,7 @@ public class LocalPrimaryCache
       metaTableName = metaTableName.substring(pos + 2);
     }
 
-    try (ResultSet dbPrimary = dbMeta.getPrimaryKeys(sc, "dbo", metaTableName))
+    try(ResultSet dbPrimary = dbMeta.getPrimaryKeys(sc, "dbo", metaTableName))
     {
       while(dbPrimary.next())
       {
