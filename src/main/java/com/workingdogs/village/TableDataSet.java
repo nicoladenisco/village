@@ -746,7 +746,8 @@ public class TableDataSet
   {
     try(TableDataSet tds = new TableDataSet(con, tableName))
     {
-      tds.where(where);
+      if(where != null)
+        tds.where(where);
       return tds.fetchAllRecords();
     }
   }

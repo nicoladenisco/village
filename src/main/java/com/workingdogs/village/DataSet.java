@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import org.commonlib5.lambda.ConsumerThrowException;
 import org.commonlib5.utils.Pair;
@@ -38,7 +39,7 @@ import org.commonlib5.utils.Pair;
  * @author <a href="mailto:jon@latchkey.com">Jon S. Stevens</a>
  * @version $Revision: 568 $
  */
-public abstract class DataSet implements Closeable
+public abstract class DataSet implements Closeable, Iterable<Record>
 {
   /** indicates that all records should be retrieved during a fetch */
   public static final int ALL_RECORDS = -1;
@@ -287,7 +288,7 @@ public abstract class DataSet implements Closeable
 
     if(records == null)
     {
-      records = new ArrayList<Record>();
+      records = new ArrayList<>();
     }
 
     Record rec = new Record(ds, true);
@@ -624,7 +625,7 @@ public abstract class DataSet implements Closeable
   /**
    * Causes the DataSet to hit the database and fetch all the records.
    *
-   * @param consumer an istance of records parser
+   * @param consumer an istance of records consumer
    * @return an instance of myself
    *
    * @exception SQLException
@@ -916,11 +917,11 @@ public abstract class DataSet implements Closeable
     {
       if((records == null) && (max > 0))
       {
-        records = new ArrayList<Record>(max);
+        records = new ArrayList<>(max);
       }
       else
       {
-        records = new ArrayList<Record>();
+        records = new ArrayList<>();
       }
 
       int startCounter = 0;
@@ -938,9 +939,10 @@ public abstract class DataSet implements Closeable
           if(startCounter >= start)
           {
             Record rec = new Record(this);
-            records.add(rec);
 
-            if(consumer != null)
+            if(consumer == null)
+              records.add(rec);
+            else
               consumer.accept(rec);
 
             fetchCount++;
@@ -979,5 +981,85 @@ public abstract class DataSet implements Closeable
   public void setPreferInsertAndGetGeneratedKeys(boolean preferInsertAndGetGeneratedKeys)
   {
     this.preferInsertAndGetGeneratedKeys = preferInsertAndGetGeneratedKeys;
+  }
+
+  @Override
+  public Iterator<Record> iterator()
+  {
+    if(records != null)
+      return records.iterator();
+
+    return new Iteratore();
+  }
+
+  private class Iteratore implements Iterator<Record>
+  {
+    public Iteratore()
+    {
+      try
+      {
+        if((stmt == null) && (resultSet == null))
+        {
+          if(selectString == null)
+          {
+            selectString = new StringBuilder(256);
+            selectString.append("SELECT ");
+            selectString.append(schema.attributes());
+            selectString.append(" FROM ");
+            selectString.append(schema.getFullTableName());
+          }
+
+          stmt = connection().createStatement();
+          resultSet = stmt.executeQuery(selectString.toString());
+        }
+      }
+      catch(Exception e)
+      {
+        throw new RuntimeException(e.getMessage(), e);
+      }
+    }
+
+    @Override
+    public boolean hasNext()
+    {
+      try
+      {
+        boolean rv = resultSet.next();
+
+        if(!rv)
+        {
+          if(resultSet != null)
+          {
+            resultSet.close();
+            resultSet = null;
+          }
+
+          if(stmt != null)
+          {
+            stmt.close();
+            stmt = null;
+          }
+        }
+
+        return rv;
+      }
+      catch(Exception ex)
+      {
+        throw new RuntimeException(ex);
+      }
+    }
+
+    @Override
+    public Record next()
+    {
+      try
+      {
+        return new Record(DataSet.this);
+      }
+      catch(Exception ex)
+      {
+        throw new RuntimeException(ex);
+      }
+    }
   }
 }

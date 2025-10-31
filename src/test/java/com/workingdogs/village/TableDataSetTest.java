@@ -70,7 +70,7 @@ public class TableDataSetTest
      throws Exception
   {
     System.out.println("TEST GENERALE");
-    try (TableDataSet tds = new TableDataSet(th.con, "stp.transcode"))
+    try(TableDataSet tds = new TableDataSet(th.con, "stp.transcode"))
     {
       tds.fetchRecords();
       assertEquals(9, tds.size());
@@ -117,7 +117,7 @@ public class TableDataSetTest
     Map<String, Object> keyValues = new HashMap<>();
     keyValues.put("app", "a");
 
-    try (TableDataSet tds = new TableDataSet(th.con, "stp.transcode"))
+    try(TableDataSet tds = new TableDataSet(th.con, "stp.transcode"))
     {
       tds.fetchByGenericValues(keyValues);
       assertEquals(6, tds.size());
@@ -144,7 +144,7 @@ public class TableDataSetTest
     Map<String, Object> keyValues = new HashMap<>();
     keyValues.put("app", "a");
 
-    try (TableDataSet tds = new TableDataSet(th.con, "stp.transcode"))
+    try(TableDataSet tds = new TableDataSet(th.con, "stp.transcode"))
     {
       tds.fetchByGenericValues(keyValues);
       assertEquals(6, tds.size());
@@ -188,7 +188,7 @@ public class TableDataSetTest
      throws Exception
   {
     System.out.println("fetchOneRecordOrNew");
-    try (TableDataSet tds = new TableDataSet(th.con, "stp.transcode"))
+    try(TableDataSet tds = new TableDataSet(th.con, "stp.transcode"))
     {
       Record r1 = tds.fetchOneRecordOrNew("app='a'", true);
       assertEquals("a", r1.getValue("app").asOkString());
@@ -233,5 +233,25 @@ public class TableDataSetTest
     System.out.println("fetchAllRecords");
     List<Record> result = TableDataSet.fetchAllRecords("stp.transcode", "app='a'", th.con);
     assertEquals(6, result.size());
+  }
+
+  @Test
+  public void testIterable()
+     throws Exception
+  {
+    System.out.println("fetchAllRecords");
+    List<Record> result = TableDataSet.fetchAllRecords("stp.transcode", null, th.con);
+
+    int count = 0;
+    try(TableDataSet tds = new TableDataSet(th.con, "stp.transcode"))
+    {
+      for(Record r : tds)
+      {
+        System.out.println("R=" + r);
+        count++;
+      }
+    }
+
+    assertEquals(result.size(), count);
   }
 }
