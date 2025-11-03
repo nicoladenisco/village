@@ -422,4 +422,45 @@ public class QueryDataSetMacroTest
       return null;
     }
   }
+
+  @Test
+  public void testIterable()
+     throws Exception
+  {
+    System.out.println("testIterable");
+    long trifMilli = DateTime.convertDateCommonFormat("2025-01-01 08:47:00");
+
+    Map<String, Object> params = new HashMap<>();
+    params.put("wapp", "d");
+    params.put("statorec", 0);
+    params.put("validita", new Date(trifMilli));
+    params.put("um", new Timestamp(trifMilli));
+
+    String sSQL
+       = "SELECT * FROM stp.transcode"
+       + " WHERE app=${wapp}"
+       + "   AND stato_rec > ${statorec}"
+       + "   AND validita >= ${validita}"
+       + "   AND ult_modif >= ${um}"
+       + " ORDER BY codice_vero";
+
+    int count1 = 0, count2 = 0;
+    try(QueryDataSetMacro qds = new QueryDataSetMacro(th.con, sSQL, params))
+    {
+      for(Record r : qds)
+      {
+        System.out.println("R1=" + r);
+        count1++;
+      }
+
+      for(Record r : qds)
+      {
+        System.out.println("R2=" + r);
+        count2++;
+      }
+    }
+
+    assertEquals(3, count1);
+    assertEquals(3, count2);
+  }
 }

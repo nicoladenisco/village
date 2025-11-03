@@ -170,17 +170,24 @@ public class QueryDataSetTest
     System.out.println("testIterable");
     final String sSQL = "SELECT * FROM stp.transcode";
 
-    int count = 0;
+    int count1 = 0, count2 = 0;
     try(QueryDataSet qds = new QueryDataSet(th.con, sSQL))
     {
       assertEquals(qds.getSelectString(), sSQL);
       for(Record r : qds)
       {
-        System.out.println("R=" + r);
-        count++;
+        System.out.println("R1=" + r);
+        count1++;
+      }
+
+      for(Record r : qds)
+      {
+        System.out.println("R2=" + r);
+        count2++;
       }
     }
 
-    assertEquals(th.getTotalRecords(), count);
+    assertEquals(th.getTotalRecords(), count1);
+    assertEquals(th.getTotalRecords(), count2);
   }
 }

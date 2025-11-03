@@ -99,7 +99,10 @@ public class QueryDataSet
     boolean ok = false;
     try
     {
-      stmt = conn.createStatement();
+      stmt = conn.createStatement(
+         ResultSet.TYPE_SCROLL_INSENSITIVE, // Permette di scorrere avanti/indietro
+         ResultSet.CONCUR_READ_ONLY // Solo lettura
+      );
       resultSet = stmt.executeQuery(selectStmt);
       schema = new Schema();
       schema.populate(resultSet.getMetaData(), null, null, conn);

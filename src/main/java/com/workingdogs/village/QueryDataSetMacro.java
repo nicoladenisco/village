@@ -18,6 +18,7 @@ package com.workingdogs.village;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -137,9 +138,7 @@ public class QueryDataSetMacro extends QueryDataSet
     boolean ok = false;
     try
     {
-      stmt = conn.prepareStatement(sql2);
-      mergeParams();
-      resultSet = ((PreparedStatement) stmt).executeQuery();
+      openResultset();
       schema = new Schema();
       schema.populate(resultSet.getMetaData(), null, null, conn);
       ok = true;
@@ -158,6 +157,19 @@ public class QueryDataSetMacro extends QueryDataSet
         }
       }
     }
+  }
+
+  @Override
+  protected void openResultset()
+     throws SQLException, DataSetException
+  {
+    stmt = conn.prepareStatement(selectString.toString(),
+       ResultSet.TYPE_SCROLL_INSENSITIVE, // Permette di scorrere avanti/indietro
+       ResultSet.CONCUR_READ_ONLY // Solo lettura
+    );
+
+    mergeParams();
+    resultSet = ((PreparedStatement) stmt).executeQuery();
   }
 
   protected String resolveMacro1(String seg)

@@ -242,16 +242,23 @@ public class TableDataSetTest
     System.out.println("testIterable");
     List<Record> result = TableDataSet.fetchAllRecords("stp.transcode", null, th.con);
 
-    int count = 0;
+    int count1 = 0, count2 = 0;
     try(TableDataSet tds = new TableDataSet(th.con, "stp.transcode"))
     {
       for(Record r : tds)
       {
-        System.out.println("R=" + r);
-        count++;
+        System.out.println("R1=" + r);
+        count1++;
+      }
+
+      for(Record r : tds)
+      {
+        System.out.println("R2=" + r);
+        count2++;
       }
     }
 
-    assertEquals(result.size(), count);
+    assertEquals(result.size(), count1);
+    assertEquals(result.size(), count2);
   }
 }
