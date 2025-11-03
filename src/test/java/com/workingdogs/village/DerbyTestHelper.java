@@ -63,7 +63,7 @@ public class DerbyTestHelper
   public void buildDb1()
      throws Exception
   {
-    try (InputStream ires = this.getClass().getResourceAsStream("/db1.sql"))
+    try(InputStream ires = this.getClass().getResourceAsStream("/db1.sql"))
     {
       VillageUtils.executeSqlScript(con, new InputStreamReader(ires, "UTF-8"), true);
     }
@@ -78,11 +78,11 @@ public class DerbyTestHelper
          + "  FROM SYS.SYSTABLES "
          + " WHERE TABLENAME = ? AND TABLETYPE = 'T'"; // Leave TABLETYPE out if you don't care about it
 
-      try (PreparedStatement ps = con.prepareStatement(query))
+      try(PreparedStatement ps = con.prepareStatement(query))
       {
         // il nome tabella deve essere maiuscolo
         ps.setString(1, "TRANSCODE");
-        try (ResultSet rs = ps.executeQuery())
+        try(ResultSet rs = ps.executeQuery())
         {
           return (rs.next() && rs.getBoolean(1));
         }
@@ -92,5 +92,15 @@ public class DerbyTestHelper
     {
       return false;
     }
+  }
+
+  public int getTotalRecords()
+  {
+    return 13;
+  }
+
+  public int getColumnsCount()
+  {
+    return 7;
   }
 }

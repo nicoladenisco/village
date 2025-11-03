@@ -73,7 +73,7 @@ public class TableDataSetTest
     try(TableDataSet tds = new TableDataSet(th.con, "stp.transcode"))
     {
       tds.fetchRecords();
-      assertEquals(9, tds.size());
+      assertEquals(th.getTotalRecords(), tds.size());
 
       Record r = tds.getRecord(0);
       assertNotNull(r);
@@ -81,7 +81,7 @@ public class TableDataSetTest
       assertEquals(r.getValue("app").asString(), "a");
 
       Schema s = tds.schema();
-      assertEquals(4, s.numberOfColumns());
+      assertEquals(th.getColumnsCount(), s.numberOfColumns());
       assertEquals(3, s.getPrimaryKeys().size());
     }
   }
@@ -128,7 +128,7 @@ public class TableDataSetTest
       assertEquals(r.getValue("app").asString(), "a");
 
       Schema s = tds.schema();
-      assertEquals(4, s.numberOfColumns());
+      assertEquals(th.getColumnsCount(), s.numberOfColumns());
       assertEquals(3, s.getPrimaryKeys().size());
     }
   }
@@ -155,7 +155,7 @@ public class TableDataSetTest
       assertEquals(r.getValue("app").asString(), "a");
 
       Schema s = tds.schema();
-      assertEquals(4, s.numberOfColumns());
+      assertEquals(th.getColumnsCount(), s.numberOfColumns());
       assertEquals(3, s.getPrimaryKeys().size());
     }
   }
@@ -193,17 +193,17 @@ public class TableDataSetTest
       Record r1 = tds.fetchOneRecordOrNew("app='a'", true);
       assertEquals("a", r1.getValue("app").asOkString());
 
-      Record r2 = tds.fetchOneRecordOrNew("app='d'", true);
+      Record r2 = tds.fetchOneRecordOrNew("app='z'", true);
       assertEquals(r2.getSaveType(), Enums.INSERT);
 
-      r2.setValue("app", "d");
-      r2.setValue("tipo", "d");
+      r2.setValue("app", "z");
+      r2.setValue("tipo", "z");
       r2.setValue("codice_vero", "PIPPO");
       r2.setValue("codice_app", "PLUTO");
       r2.save();
 
-      Record r3 = tds.fetchOneRecordOrNew("app='d'", true);
-      assertEquals("d", r3.getValue("app").asOkString());
+      Record r3 = tds.fetchOneRecordOrNew("app='z'", true);
+      assertEquals("z", r3.getValue("app").asOkString());
 
       r3.markToBeDeleted();
       tds.save();
@@ -239,7 +239,7 @@ public class TableDataSetTest
   public void testIterable()
      throws Exception
   {
-    System.out.println("fetchAllRecords");
+    System.out.println("testIterable");
     List<Record> result = TableDataSet.fetchAllRecords("stp.transcode", null, th.con);
 
     int count = 0;

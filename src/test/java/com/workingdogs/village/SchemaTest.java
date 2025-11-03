@@ -67,10 +67,10 @@ public class SchemaTest
      throws Exception
   {
     System.out.println("TEST GENERALE");
-    try (TableDataSet tds = new TableDataSet(th.con, "stp.transcode"))
+    try(TableDataSet tds = new TableDataSet(th.con, "stp.transcode"))
     {
       tds.fetchRecords();
-      assertEquals(9, tds.size());
+      assertEquals(th.getTotalRecords(), tds.size());
 
       Record r = tds.getRecord(0);
       assertNotNull(r);
@@ -78,7 +78,7 @@ public class SchemaTest
       assertEquals(r.getValue("app").asString(), "a");
 
       Schema s = tds.schema();
-      assertEquals(4, s.numberOfColumns());
+      assertEquals(th.getColumnsCount(), s.numberOfColumns());
       assertEquals(3, s.getPrimaryKeys().size());
     }
   }

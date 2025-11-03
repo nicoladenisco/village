@@ -4,6 +4,9 @@ CREATE TABLE stp.transcode
     tipo VARCHAR(16) NOT NULL,
     codice_vero VARCHAR(64) NOT NULL,
     codice_app VARCHAR(64) NOT NULL,
+    validita DATE,
+    stato_rec INTEGER default 0,
+    ult_modif TIMESTAMP,
     CONSTRAINT transcode_pkey PRIMARY KEY (app, tipo, codice_vero)
 );
 
@@ -31,4 +34,11 @@ INSERT INTO stp.transcode (app, tipo, codice_vero, codice_app)
 INSERT INTO stp.transcode (app, tipo, codice_vero, codice_app)
   VALUES ('c', 'c', 'CODVERO9', 'CODAPP9');
 
-
+INSERT INTO stp.transcode (app, tipo, codice_vero, codice_app, validita, stato_rec, ult_modif)
+  VALUES ('d', 'd', 'CODVER10', 'CODAPP10', CURRENT_DATE, 0, CURRENT_TIMESTAMP);
+INSERT INTO stp.transcode (app, tipo, codice_vero, codice_app, validita, stato_rec, ult_modif)
+  VALUES ('d', 'd', 'CODVER11', 'CODAPP11', CURRENT_DATE, 1, CURRENT_TIMESTAMP);
+INSERT INTO stp.transcode (app, tipo, codice_vero, codice_app, validita, stato_rec, ult_modif)
+  VALUES ('d', 'd', 'CODVER12', 'CODAPP12', CURRENT_DATE, 2, CURRENT_TIMESTAMP);
+INSERT INTO stp.transcode (app, tipo, codice_vero, codice_app, validita, stato_rec, ult_modif)
+  VALUES ('d', 'd', 'CODVER13', 'CODAPP13', CURRENT_DATE, 3, CURRENT_TIMESTAMP);

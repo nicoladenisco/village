@@ -75,7 +75,7 @@ public class QueryDataSetTest
     {
       assertEquals(qds.getSelectString(), sSQL);
       qds.fetchRecords();
-      assertEquals(9, qds.size());
+      assertEquals(th.getTotalRecords(), qds.size());
 
       Record r = qds.getRecord(0);
       assertNotNull(r);
@@ -132,13 +132,13 @@ public class QueryDataSetTest
     final String sSQL = "SELECT * FROM stp.transcode";
 
     List<Record> ls1 = QueryDataSet.fetchAllRecords(th.con, sSQL);
-    assertEquals(9, ls1.size());
+    assertEquals(th.getTotalRecords(), ls1.size());
 
     try(Statement st = th.con.createStatement();
        ResultSet rs = st.executeQuery(sSQL))
     {
       List<Record> result = QueryDataSet.fetchAllRecords(rs);
-      assertEquals(9, result.size());
+      assertEquals(th.getTotalRecords(), result.size());
     }
   }
 
@@ -153,13 +153,13 @@ public class QueryDataSetTest
     final String sSQL = "SELECT * FROM stp.transcode";
 
     Pair<Schema, List<Record>> ls1 = QueryDataSet.fetchAllRecordsAndSchema(th.con, sSQL);
-    assertEquals(9, ls1.second.size());
+    assertEquals(th.getTotalRecords(), ls1.second.size());
 
     try(Statement st = th.con.createStatement();
        ResultSet rs = st.executeQuery(sSQL))
     {
       Pair<Schema, List<Record>> result = QueryDataSet.fetchAllRecordsAndSchema(rs);
-      assertEquals(9, result.second.size());
+      assertEquals(th.getTotalRecords(), result.second.size());
     }
   }
 
@@ -167,7 +167,7 @@ public class QueryDataSetTest
   public void testIterable()
      throws Exception
   {
-    System.out.println("fetchAllRecords");
+    System.out.println("testIterable");
     final String sSQL = "SELECT * FROM stp.transcode";
 
     int count = 0;
@@ -181,6 +181,6 @@ public class QueryDataSetTest
       }
     }
 
-    assertEquals(9, count);
+    assertEquals(th.getTotalRecords(), count);
   }
 }

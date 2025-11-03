@@ -48,6 +48,20 @@ import org.commonlib5.utils.Pair;
  * It is important to always remember to close() a QueryDataSet in order to free the allocated resources
  * (or use a try with resource like the example).
  * <br>
+ * <b>Nuova versione con iteratore.</b>
+ * <PRE>
+ *  try(QueryDataSet qds = new QueryDataSet ( connection, "SELECT * from my_table" ))
+ *  {
+ *    for ( Record rec : qds )
+ *    {
+ *      int value = rec.getValue("column").asInt();
+ *      log.debug ( "The value is: " + value );
+ *    }
+ *  }
+ * </PRE>
+ * E' consigliata rispetto alla versione precedente.
+ * Il caricamento dei records è progressivo, senza sovraccaricare db e memoria.
+ * <br>
  *
  * @author
  * <a href="mailto:jon@latchkey.com">Jon S. Stevens</a>
