@@ -833,21 +833,7 @@ public abstract class DataSet implements Closeable, Iterable<Record>
 
     try
     {
-      if((stmt == null) && (resultSet == null))
-      {
-        if(selectString == null)
-        {
-          selectString = new StringBuilder(256);
-          selectString.append("SELECT ");
-          selectString.append(schema.attributes());
-          selectString.append(" FROM ");
-          selectString.append(schema.getFullTableName());
-        }
-
-        stmt = connection().createStatement();
-        resultSet = stmt.executeQuery(selectString.toString());
-      }
-
+      openResultset();
       populateRecords(start, max, consumer);
     }
     catch(SQLException | DataSetException e)
@@ -874,6 +860,29 @@ public abstract class DataSet implements Closeable, Iterable<Record>
     }
 
     return this;
+  }
+
+  protected void openResultset()
+     throws SQLException, DataSetException
+  {
+    if((stmt == null) && (resultSet == null))
+    {
+      if(selectString == null)
+      {
+        selectString = new StringBuilder(256);
+        selectString.append("SELECT ");
+        selectString.append(schema.attributes());
+        selectString.append(" FROM ");
+        selectString.append(schema.getFullTableName());
+      }
+
+      stmt = conn.createStatement(
+         ResultSet.TYPE_SCROLL_INSENSITIVE, // Permette di scorrere avanti/indietro
+         ResultSet.CONCUR_READ_ONLY // Solo lettura
+      );
+
+      resultSet = stmt.executeQuery(selectString.toString());
+    }
   }
 
   /**
@@ -998,20 +1007,8 @@ public abstract class DataSet implements Closeable, Iterable<Record>
     {
       try
       {
-        if((stmt == null) && (resultSet == null))
-        {
-          if(selectString == null)
-          {
-            selectString = new StringBuilder(256);
-            selectString.append("SELECT ");
-            selectString.append(schema.attributes());
-            selectString.append(" FROM ");
-            selectString.append(schema.getFullTableName());
-          }
-
-          stmt = connection().createStatement();
-          resultSet = stmt.executeQuery(selectString.toString());
-        }
+        openResultset();
+        resultSet.beforeFirst();
       }
       catch(Exception e)
       {
@@ -1024,24 +1021,7 @@ public abstract class DataSet implements Closeable, Iterable<Record>
     {
       try
       {
-        boolean rv = resultSet.next();
-
-        if(!rv)
-        {
-          if(resultSet != null)
-          {
-            resultSet.close();
-            resultSet = null;
-          }
-
-          if(stmt != null)
-          {
-            stmt.close();
-            stmt = null;
-          }
-        }
-
-        return rv;
+        return resultSet.next();
       }
       catch(Exception ex)
       {
