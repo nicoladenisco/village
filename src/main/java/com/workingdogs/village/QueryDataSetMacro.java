@@ -109,6 +109,7 @@ public class QueryDataSetMacro extends QueryDataSet
 {
   public static final Pattern macroPattern = Pattern.compile("\\$\\{([a-z|A-Z|0-9|_|\\.]+)\\}");
   public static final Pattern macroPatternParam = Pattern.compile("\\$\\{([a-z|A-Z|0-9|_|\\.]+)\\:([a-z|A-Z]+)\\}");
+  public static final Pattern macroPatternLitteral = Pattern.compile("\\#\\{([a-z|A-Z|0-9|_|\\.]+)\\}");
   public final List<Info> lsInfo = new ArrayList<>();
   public final Map<String, Object> parMap = new HashMap<>();
 
@@ -121,10 +122,11 @@ public class QueryDataSetMacro extends QueryDataSet
      throws SQLException, DataSetException
   {
     parMap.putAll(values);
-    String sql1 = resolveMacro1(selectStmt);
+    String sql0 = resolveMacro0(selectStmt);
+    String sql1 = resolveMacro1(sql0);
     String sql2 = resolveMacro2(sql1);
 
-    if(sql2.contains("${"))
+    if(sql2.contains("${") || sql2.contains("#{"))
       throw new DataSetException("Unresolved macro in sql (" + sql2 + ")");
 
     if(!lsInfo.isEmpty())
@@ -133,7 +135,7 @@ public class QueryDataSetMacro extends QueryDataSet
     //System.out.println("sql=" + sql2);
     //System.out.println("info=" + lsInfo);
     this.conn = conn;
-    selectString = new StringBuilder(sql2);
+    selectString = new StringBuilder(sql2.trim());
 
     boolean ok = false;
     try
@@ -170,6 +172,29 @@ public class QueryDataSetMacro extends QueryDataSet
 
     mergeParams();
     resultSet = ((PreparedStatement) stmt).executeQuery();
+  }
+
+  protected String resolveMacro0(String seg)
+     throws DataSetException
+  {
+    Matcher m = macroPatternLitteral.matcher(seg);
+
+    StringBuffer sb = new StringBuffer();
+    while(m.find())
+    {
+      if(m.groupCount() != 1)
+        throw new DataSetException("Syntax error in " + seg);
+
+      String keyMacro = m.group(1);
+      Object value = parMap.get(keyMacro);
+      if(value == null)
+        throw new DataSetException("Undefined litteral macro " + keyMacro);
+
+      m.appendReplacement(sb, value.toString());
+    }
+    m.appendTail(sb);
+
+    return sb.toString();
   }
 
   protected String resolveMacro1(String seg)
