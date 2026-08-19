@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,6 +91,12 @@ import org.commonlib5.utils.StringOper;
  *
  * "ts":
  * "timestamp":"java.sql.Timestamp"
+ *
+ * "tsi":"java.sql.Timestamp"
+ * approssimato a inizio giorno ovvero 00:00:00
+ *
+ * "tsf":"java.sql.Timestamp"
+ * approssimato a fine giorno ovvero 23:59:59.9999
  *
  * "date":"java.sql.Date"
  *
@@ -301,13 +308,7 @@ public class QueryDataSetMacro extends QueryDataSet
         break;
       case "ts":
       case "timestamp":
-        if(!Timestamp.class.isAssignableFrom(value.getClass()))
-        {
-          if(value instanceof java.util.Date)
-            value = new Timestamp(((java.util.Date) value).getTime());
-          else
-            value = new Timestamp(convertDateCommonFormat(value.toString()));
-        }
+        value = convertToTimestamp(value);
       case "Timestamp":
         ps.setTimestamp(c, (Timestamp) value);
         break;
@@ -325,7 +326,41 @@ public class QueryDataSetMacro extends QueryDataSet
       case "UDate":
         ps.setDate(c, new java.sql.Date(((java.util.Date) value).getTime()));
         break;
+
+      case "tsi":
+        ps.setTimestamp(c, inizioGiorno(value));
+        break;
+
+      case "tsf":
+        ps.setTimestamp(c, fineGiorno(value));
+        break;
     }
+  }
+
+  protected Timestamp convertToTimestamp(Object value)
+  {
+    if(!Timestamp.class.isAssignableFrom(value.getClass()))
+    {
+      if(value instanceof java.util.Date)
+        value = new Timestamp(((java.util.Date) value).getTime());
+      else
+        value = new Timestamp(convertDateCommonFormat(value.toString()));
+    }
+    return (Timestamp) value;
+  }
+
+  protected Timestamp inizioGiorno(Object value)
+  {
+    Timestamp t = convertToTimestamp(value);
+    Date inizioGiorno = DateTime.inizioGiorno(t);
+    return new Timestamp(inizioGiorno.getTime());
+  }
+
+  protected Timestamp fineGiorno(Object value)
+  {
+    Timestamp t = convertToTimestamp(value);
+    Date fineGiorno = DateTime.fineGiorno(t);
+    return new Timestamp(fineGiorno.getTime());
   }
 
   private String detectParam(Info i, Object value)
