@@ -391,6 +391,15 @@ public class QueryDataSetMacro extends QueryDataSet
     return rv;
   }
 
+  public static List<Record> fetchAllRecords(Connection dbCon, String sSQL, Map<String, ? extends Object> values)
+     throws Exception
+  {
+    try(QueryDataSetMacro qs = new QueryDataSetMacro(dbCon, sSQL, values))
+    {
+      return qs.fetchAllRecords();
+    }
+  }
+
   public static final ArrayMap<Class, String> types = new ArrayMap<>();
 
   static
