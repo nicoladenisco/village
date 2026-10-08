@@ -41,7 +41,8 @@ import org.commonlib5.utils.StringOper;
  *    "wapp", "d",
  *    "statorec", "0",
  *    "validita", "2025-11-01",
- *    "um", "2025-11-01 08:47:00"
+ *    "um", "2025-11-01 08:47:00",
+ *    "stringaletterale", "'AA','BB','CC'"
  * );
  *
  * String sSQL
@@ -50,6 +51,7 @@ import org.commonlib5.utils.StringOper;
  *    + "   AND stato_rec > ${statorec:int}"
  *    + "   AND validita >= ${validita:date}"
  *    + "   AND ult_modif >= ${um:ts}"
+ *    + "   AND tipo IN (#{stringaletterale})"
  *    + " ORDER BY codice_vero";
  *
  * try(QueryDataSetMacro qds = new QueryDataSetMacro(th.con, sSQL, params))
