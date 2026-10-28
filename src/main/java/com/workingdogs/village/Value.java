@@ -1223,6 +1223,9 @@ public class Value
       }
       else if(isString())
       {
+        if("NULL".equalsIgnoreCase((String) valueObject))
+          return null;
+
         return parseTimestamp((String) valueObject);
       }
       else
