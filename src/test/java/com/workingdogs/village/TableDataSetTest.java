@@ -261,4 +261,32 @@ public class TableDataSetTest
     assertEquals(result.size(), count1);
     assertEquals(result.size(), count2);
   }
+
+  @Test
+  public void testFetchOneRecordOrNewReplacement()
+     throws Exception
+  {
+    System.out.println("fetchOneRecordOrNewReplacement");
+    try(TableDataSet tds = new TableDataSet(th.con, "stp.transcode"))
+    {
+      Record r1 = tds.fetchOneRecordOrNew("app=?", true, "a");
+      assertEquals("a", r1.getValue("app").asOkString());
+
+      Record r2 = tds.fetchOneRecordOrNew("app=?", true, "z");
+      assertEquals(r2.getSaveType(), Enums.INSERT);
+
+      r2.setValue("app", "z");
+      r2.setValue("tipo", "z");
+      r2.setValue("codice_vero", "PIPPO");
+      r2.setValue("codice_app", "PLUTO");
+      r2.save();
+
+      Record r3 = tds.fetchOneRecordOrNew("app='z'", true);
+      assertEquals("z", r3.getValue("app").asOkString());
+
+      r3.markToBeDeleted();
+      tds.save();
+      assertEquals(0, tds.size());
+    }
+  }
 }

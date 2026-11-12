@@ -190,4 +190,17 @@ public class QueryDataSetTest
     assertEquals(th.getTotalRecords(), count1);
     assertEquals(th.getTotalRecords(), count2);
   }
+
+  @Test
+  public void testReplacement()
+     throws Exception
+  {
+    System.out.println("testReplacement");
+    final String sSQL = "SELECT * FROM stp.transcode WHERE app=? AND tipo=?";
+
+    try(QueryDataSet qds = new QueryDataSet(th.con, sSQL, "a", "a"))
+    {
+      assertEquals(qds.fetchAllRecords().size(), 3);
+    }
+  }
 }

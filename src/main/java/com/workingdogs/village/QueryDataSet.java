@@ -19,9 +19,11 @@ package com.workingdogs.village;
  * under the License.
  */
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.commonlib5.utils.Pair;
 
@@ -111,16 +113,60 @@ public class QueryDataSet
     finally
     {
       if(!ok)
-      {
-        try
-        {
-          close();
-        }
-        catch(Exception ignored)
-        {
-          // ignore as another exception is already thrown
-        }
-      }
+        VillageUtils.close(this);
+    }
+  }
+
+  /**
+   * Creates a new QueryDataSet based on a connection and a select string.
+   *
+   * @param conn
+   * @param selectStmt
+   * @param replacements
+   *
+   * @exception SQLException
+   * @exception DataSetException
+   */
+  public QueryDataSet(Connection conn, String selectStmt, Object... replacements)
+     throws SQLException, DataSetException
+  {
+    this(conn, selectStmt, Arrays.asList(replacements));
+  }
+
+  /**
+   * Creates a new QueryDataSet based on a connection and a select string.
+   *
+   * @param conn
+   * @param selectStmt
+   * @param replacements
+   *
+   * @exception SQLException
+   * @exception DataSetException
+   */
+  public QueryDataSet(Connection conn, String selectStmt, List<Object> replacements)
+     throws SQLException, DataSetException
+  {
+    this.conn = conn;
+    selectString = new StringBuilder(selectStmt);
+
+    boolean ok = false;
+    try
+    {
+      stmt = conn.prepareStatement(selectString.toString(),
+         ResultSet.TYPE_SCROLL_INSENSITIVE, // Permette di scorrere avanti/indietro
+         ResultSet.CONCUR_READ_ONLY // Solo lettura
+      );
+      VillageUtils.setPreparedStatementReplacements((PreparedStatement) stmt, replacements, 0);
+
+      resultSet = ((PreparedStatement) stmt).executeQuery();
+      schema = new Schema();
+      schema.populate(resultSet.getMetaData(), null, null, conn);
+      ok = true;
+    }
+    finally
+    {
+      if(!ok)
+        VillageUtils.close(this);
     }
   }
 

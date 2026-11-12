@@ -20,8 +20,10 @@ package com.workingdogs.village;
  */
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -481,7 +483,8 @@ public class TableDataSet
 
     //String schema = schema.get
     selectString.append("SELECT ");
-    selectString.append(schema.attributes());
+    //selectString.append(schema.attributes());
+    selectString.append("*");
     selectString.append(" FROM ");
     selectString.append(schema.getFullTableName());
 
@@ -720,6 +723,47 @@ public class TableDataSet
     clear();
     where(where);
     fetchRecords(1);
+
+    if(lastFetchSize() == 1)
+      return getRecord(0);
+
+    if(createIfNotExist)
+      return addRecord();
+
+    return null;
+  }
+
+  public Record fetchOneRecordOrNew(String where, boolean createIfNotExist, Object... replacement)
+     throws Exception
+  {
+    clear();
+    where(where);
+    buildSelectString();
+
+    boolean ok = false;
+    try
+    {
+      stmt = conn.prepareStatement(selectString.toString(),
+         ResultSet.TYPE_SCROLL_INSENSITIVE, // Permette di scorrere avanti/indietro
+         ResultSet.CONCUR_READ_ONLY // Solo lettura
+      );
+      VillageUtils.setPreparedStatementReplacements((PreparedStatement) stmt, Arrays.asList(replacement), 0);
+
+      resultSet = ((PreparedStatement) stmt).executeQuery();
+      if(schema == null)
+      {
+        schema = new Schema();
+        schema.populate(resultSet.getMetaData(), null, null, conn);
+      }
+      ok = true;
+    }
+    finally
+    {
+      if(!ok)
+        VillageUtils.close(this);
+    }
+
+    super.fetchRecords(0, 1, null);
 
     if(lastFetchSize() == 1)
       return getRecord(0);
