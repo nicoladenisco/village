@@ -237,8 +237,7 @@ public class VillageUtils
       }
       catch(Exception ignored)
       {
-        log.debug("Caught exception when closing a QueryDataSet",
-           ignored);
+        log.debug("Caught exception when closing a QueryDataSet", ignored);
       }
     }
   }
@@ -260,8 +259,7 @@ public class VillageUtils
     }
     catch(Exception ignored)
     {
-      log.debug("Caught exception when closing an OutputStream",
-         ignored);
+      log.debug("Caught exception when closing an OutputStream", ignored);
     }
   }
 
@@ -299,9 +297,7 @@ public class VillageUtils
    * @param colName The name of the column in the record
    * @throws java.lang.Exception
    */
-  public static final void setVillageValue(Object value,
-     final Record rec,
-     final String colName)
+  public static final void setVillageValue(Object value, final Record rec, final String colName)
      throws Exception
   {
     if(value == null)
