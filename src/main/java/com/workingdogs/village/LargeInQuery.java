@@ -91,8 +91,8 @@ public class LargeInQuery<T>
     if(parametri.size() > maxQueryin)
     {
       int split = parametri.size() / 2;
-      int p1 = executeQuery(sSQL, parametri.subList(0, split), con);
-      int p2 = executeQuery(sSQL, parametri.subList(split, parametri.size()), con);
+      int p1 = executeQuerySplit(sSQL, parametri.subList(0, split), con);
+      int p2 = executeQuerySplit(sSQL, parametri.subList(split, parametri.size()), con);
       return p1 + p2;
     }
 
