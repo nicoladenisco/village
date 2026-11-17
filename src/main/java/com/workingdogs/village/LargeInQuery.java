@@ -21,11 +21,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import org.commonlib5.utils.ArrayOper;
 import org.commonlib5.utils.Pair;
 import org.commonlib5.utils.StringJoin;
 
 /**
  * Helper per eseguire query con clausola in molto estesa.
+ * La query viene eseguita spezzando la lista parametri in
+ * sotto parti per non generare uno statemente ecessivamente lungo.<br>
+ * Una query del tipo:
+ * <pre>
+ * SELECT * FROM stp.transcode WHERE app IN (###)
+ * </pre>
+ * viene eseguita più volte se la lista parametri supera maxQueryin (default 500).<br>
+ * I risultati complessivi sono cumulati e recuperabili insieme allo schema.
  *
  * @author Nicola De Nisco
  * @param <T> tipo di dato; solo String, Integer, Long
@@ -33,6 +42,7 @@ import org.commonlib5.utils.StringJoin;
 public class LargeInQuery<T>
 {
   protected int maxQueryin = 500;
+  protected String parmacro = "###";
   protected Class<? extends Object> objClass;
   protected Schema schema;
   protected final List<Record> lsr = new ArrayList<>(128);
@@ -41,19 +51,31 @@ public class LargeInQuery<T>
   {
   }
 
-  protected int executeQuery(String sSQL, Connection con, T... parametri)
+  public LargeInQuery(int maxQueryin, String parmacro)
+  {
+    this.maxQueryin = maxQueryin;
+    this.parmacro = parmacro;
+  }
+
+  public int executeQuery(String sSQL, Connection con, T... parametri)
      throws Exception
   {
     return executeQuery(sSQL, Arrays.asList(parametri), con);
   }
 
-  protected int executeQuery(String sSQL, T[] parametri, Connection con)
+  public int executeQuery(String sSQL, T[] parametri, Connection con)
      throws Exception
   {
     return executeQuery(sSQL, Arrays.asList(parametri), con);
   }
 
-  protected int executeQuery(String sSQL, List<T> parametri, Connection con)
+  public int executeQuery(String sSQL, int[] arId, Connection con)
+     throws Exception
+  {
+    return executeQuery(sSQL, (List<T>) ArrayOper.asList(arId), con);
+  }
+
+  public int executeQuery(String sSQL, List<T> parametri, Connection con)
      throws Exception
   {
     if(parametri.isEmpty())
@@ -81,7 +103,7 @@ public class LargeInQuery<T>
      throws Exception
   {
     String join = join(parametri);
-    String sSQL1 = sSQL.replace("###", join);
+    String sSQL1 = sSQL.replace(parmacro, join);
 
     if(schema == null)
     {
@@ -111,7 +133,7 @@ public class LargeInQuery<T>
     return schema;
   }
 
-  public List<Record> getRecord()
+  public List<Record> getRecords()
   {
     return lsr;
   }
